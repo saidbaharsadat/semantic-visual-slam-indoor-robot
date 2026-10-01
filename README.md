@@ -1,23 +1,22 @@
 # Semantic Visual SLAM for Indoor Mobile Robot Perception
 
-A practical robotic-vision project combining RGB-D visual SLAM, object perception, semantic 3D mapping, and dynamic-object filtering.
+An ongoing robotic-vision prototype for RGB-D object perception, semantic 3D mapping, and basic dynamic-object filtering. The current implementation validates the semantic-mapping pipeline with benchmark camera poses; full Visual SLAM integration is planned as future work.
 
 ## Project goals
 
 This repository turns the CV project into a reproducible implementation:
 
-- estimate indoor camera motion with RGB-D Visual SLAM;
 - detect and segment objects in RGB frames;
 - project recognized objects into 3D using aligned depth;
 - transform observations into a shared world frame;
 - build a semantic point-cloud map;
 - filter dynamic objects such as people from stable geometry;
 - compare filtered and unfiltered maps;
-- evaluate localization against benchmark ground truth.
+- prepare the pipeline for later Visual SLAM integration and localization evaluation.
 
-## First benchmark
+## Current project stage
 
-The first reproducible experiment uses the TUM RGB-D `freiburg3_walking_xyz` sequence. We first validate semantic mapping with ground-truth poses, then replace those poses with ORB-SLAM3 output.
+The current prototype uses the TUM RGB-D `freiburg3_walking_xyz` sequence to validate object perception, 3D semantic mapping, and person filtering with benchmark camera poses. Full ORB-SLAM3 pose integration, live-camera operation, and robot deployment are intentionally kept as future milestones because this project is still ongoing.
 
 ## Pipeline
 
@@ -50,9 +49,8 @@ depth + masks + camera poses -----+
 
 ## Technology stack
 
-- ORB-SLAM3 for RGB-D visual SLAM
 - Ultralytics YOLO segmentation for object perception
-- Open3D for point-cloud processing and visualization
+- NumPy/OpenCV for RGB-D geometry and point-cloud export
 - OpenCV and NumPy for RGB-D processing and geometry
 - TUM RGB-D benchmark for reproducible evaluation
 
@@ -139,17 +137,9 @@ run_metadata.json
 
 Run the same command without `--filter-dynamic` to create an unfiltered comparison map.
 
-## Stage 2: ORB-SLAM3 integration
+## Planned next stage: Visual SLAM integration
 
-After building ORB-SLAM3, run its TUM RGB-D example and save `CameraTrajectory.txt`. Then use that file as the `--poses` input to the semantic mapper.
-
-## Stage 3: localization evaluation
-
-```bash
-python tools/evaluate_trajectory.py \
-  --estimate results/orbslam3/CameraTrajectory.txt \
-  --ground-truth data/rgbd_dataset_freiburg3_walking_xyz/groundtruth.txt
-```
+A later milestone will replace benchmark poses with an estimated RGB-D Visual SLAM trajectory and evaluate localization error. This is intentionally listed as future work rather than part of the current completed prototype.
 
 ## First benchmark result
 

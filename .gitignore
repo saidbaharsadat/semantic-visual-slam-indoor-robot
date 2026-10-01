@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large datasets and generated outputs
+data/*
+!data/.gitkeep
+results/*
+!results/.gitkeep
+
+# Model weights
+*.pt
+*.onnx
+*.engine
+
+# ORB-SLAM3 outputs
+CameraTrajectory.txt
+KeyFrameTrajectory.txt

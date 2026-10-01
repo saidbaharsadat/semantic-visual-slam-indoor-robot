@@ -10,6 +10,7 @@ import numpy as np
 
 from .detector import Detection
 from .geometry import masked_3d_centroid, sampled_depth_points, transform_points
+from .pointcloud import voxel_downsample, write_ply
 
 
 @dataclass
@@ -87,8 +88,6 @@ class SemanticMapper:
         self.frame_summaries.append(FrameSummary(timestamp, int(len(points_world)), len(detections), dynamic_count))
 
     def save(self, output_dir: str | Path, metadata: dict | None = None) -> dict:
-        import open3d as o3d
-
         output = Path(output_dir)
         output.mkdir(parents=True, exist_ok=True)
         if not self._points:
@@ -96,16 +95,11 @@ class SemanticMapper:
 
         points = np.concatenate(self._points, axis=0)
         colors = np.concatenate(self._colors, axis=0)
-        pcd = o3d.geometry.PointCloud()
-        pcd.points = o3d.utility.Vector3dVector(points)
-        pcd.colors = o3d.utility.Vector3dVector(colors)
-        before = len(pcd.points)
+        before = len(points)
 
         voxel_size = float(self.mapping["voxel_size_m"])
-        if voxel_size > 0:
-            pcd = pcd.voxel_down_sample(voxel_size=voxel_size)
-
-        o3d.io.write_point_cloud(str(output / "semantic_map.ply"), pcd)
+        points_out, colors_out = voxel_downsample(points, colors, voxel_size)
+        write_ply(output / "semantic_map.ply", points_out, colors_out)
 
         with (output / "object_observations.csv").open("w", newline="", encoding="utf-8") as handle:
             writer = csv.writer(handle)
@@ -121,7 +115,7 @@ class SemanticMapper:
 
         summary = {
             "raw_points": int(before),
-            "downsampled_points": int(len(pcd.points)),
+            "downsampled_points": int(len(points_out)),
             "object_observations": len(self.object_observations),
             "processed_frames": len(self.frame_summaries),
             **(metadata or {}),

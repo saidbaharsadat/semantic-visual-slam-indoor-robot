@@ -1,0 +1,77 @@
+name: TUM RGB-D benchmark smoke test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/benchmark-smoke.yml"
+      - "src/**"
+      - "tools/**"
+      - "configs/**"
+      - "pyproject.toml"
+
+jobs:
+  benchmark-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+          python -m pip install pytest
+
+      - name: Run unit tests
+        run: pytest -q
+
+      - name: Download TUM fr3/walking_xyz
+        run: |
+          mkdir -p data
+          curl -L --fail --retry 3 \
+            "https://webshare.cvg.cit.tum.de/g/rgbd/dataset/freiburg3/rgbd_dataset_freiburg3_walking_xyz.tgz" \
+            -o /tmp/fr3_walking_xyz.tgz
+          tar -xzf /tmp/fr3_walking_xyz.tgz -C data
+          test -f data/rgbd_dataset_freiburg3_walking_xyz/rgb.txt
+          test -f data/rgbd_dataset_freiburg3_walking_xyz/depth.txt
+          test -f data/rgbd_dataset_freiburg3_walking_xyz/groundtruth.txt
+
+      - name: Build associations
+        run: |
+          python tools/make_associations.py \
+            --rgb data/rgbd_dataset_freiburg3_walking_xyz/rgb.txt \
+            --depth data/rgbd_dataset_freiburg3_walking_xyz/depth.txt \
+            --output data/rgbd_dataset_freiburg3_walking_xyz/associations.txt
+
+      - name: Build lightweight semantic map
+        run: |
+          python tools/build_semantic_map.py \
+            --config configs/tum_fr3_walking.yaml \
+            --dataset data/rgbd_dataset_freiburg3_walking_xyz \
+            --poses data/rgbd_dataset_freiburg3_walking_xyz/groundtruth.txt \
+            --output results/groundtruth_filtered_smoke \
+            --filter-dynamic \
+            --frame-step 90
+
+      - name: Show run metadata
+        run: cat results/groundtruth_filtered_smoke/run_metadata.json
+
+      - name: Upload experiment artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tum-fr3-walking-xyz-semantic-map-smoke
+          path: |
+            results/groundtruth_filtered_smoke/semantic_map.ply
+            results/groundtruth_filtered_smoke/object_observations.csv
+            results/groundtruth_filtered_smoke/frame_summary.csv
+            results/groundtruth_filtered_smoke/run_metadata.json
+          retention-days: 14

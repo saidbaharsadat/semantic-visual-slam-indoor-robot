@@ -1,0 +1,133 @@
+name: ORB-SLAM3 RGB-D baseline
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/orbslam3-baseline.yml"
+      - "tools/evaluate_trajectory.py"
+      - "src/semantic_slam/geometry.py"
+      - "src/semantic_slam/io.py"
+
+jobs:
+  orbslam3-rgbd:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+
+    env:
+      ORBSLAM3_SHA: 4452a3c4ab75b1cde34e5505a36ec3f9edcdc4c4
+      PANGOLIN_SHA: 3667bb76edcc3e4111d2bee7935ce204f04026d9
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python evaluation dependencies
+        run: python -m pip install numpy
+
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake git pkg-config \
+            libopencv-dev libeigen3-dev \
+            libglew-dev libgl1-mesa-dev libegl1-mesa-dev \
+            libx11-dev libxkbcommon-dev libwayland-dev wayland-protocols \
+            libjpeg-dev libpng-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev \
+            libboost-all-dev libssl-dev
+
+      - name: Build and install pinned Pangolin
+        run: |
+          git clone --recursive https://github.com/stevenlovegrove/Pangolin.git /tmp/Pangolin
+          cd /tmp/Pangolin
+          git checkout "$PANGOLIN_SHA"
+          git submodule update --init --recursive
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_EXAMPLES=OFF \
+            -DBUILD_TOOLS=OFF \
+            -DBUILD_PANGOLIN_PYTHON=OFF
+          cmake --build build --parallel 2
+          sudo cmake --install build
+          sudo ldconfig
+
+      - name: Build pinned ORB-SLAM3 headless RGB-D example
+        run: |
+          git clone https://github.com/UZ-SLAMLab/ORB_SLAM3.git /tmp/ORB_SLAM3
+          cd /tmp/ORB_SLAM3
+          git checkout "$ORBSLAM3_SHA"
+          sed -i 's/ORB_SLAM3::System::RGBD,true/ORB_SLAM3::System::RGBD,false/' Examples/RGB-D/rgbd_tum.cc
+          chmod +x build.sh
+          ./build.sh
+          test -x Examples/RGB-D/rgbd_tum
+          test -f Vocabulary/ORBvoc.txt
+
+      - name: Download TUM fr3/walking_xyz
+        run: |
+          mkdir -p data
+          curl -L --fail --retry 3 \
+            "https://webshare.cvg.cit.tum.de/g/rgbd/dataset/freiburg3/rgbd_dataset_freiburg3_walking_xyz.tgz" \
+            -o /tmp/fr3_walking_xyz.tgz
+          tar -xzf /tmp/fr3_walking_xyz.tgz -C data
+
+      - name: Build RGB-depth associations
+        env:
+          PYTHONPATH: src
+        run: |
+          python tools/make_associations.py \
+            --rgb data/rgbd_dataset_freiburg3_walking_xyz/rgb.txt \
+            --depth data/rgbd_dataset_freiburg3_walking_xyz/depth.txt \
+            --output data/rgbd_dataset_freiburg3_walking_xyz/associations.txt
+
+      - name: Run ORB-SLAM3 RGB-D
+        run: |
+          mkdir -p results/orbslam3
+          cd results/orbslam3
+          PANGOLIN_WINDOW_URI="headless://" \
+          /tmp/ORB_SLAM3/Examples/RGB-D/rgbd_tum \
+            /tmp/ORB_SLAM3/Vocabulary/ORBvoc.txt \
+            /tmp/ORB_SLAM3/Examples/RGB-D/TUM3.yaml \
+            "$GITHUB_WORKSPACE/data/rgbd_dataset_freiburg3_walking_xyz" \
+            "$GITHUB_WORKSPACE/data/rgbd_dataset_freiburg3_walking_xyz/associations.txt"
+          test -s CameraTrajectory.txt
+          test -s KeyFrameTrajectory.txt
+
+      - name: Evaluate ORB-SLAM3 trajectory
+        env:
+          PYTHONPATH: src
+        run: |
+          python tools/evaluate_trajectory.py \
+            --estimate results/orbslam3/CameraTrajectory.txt \
+            --ground-truth data/rgbd_dataset_freiburg3_walking_xyz/groundtruth.txt \
+            --max-difference 0.03 \
+            --output-json results/orbslam3/trajectory_metrics.json
+          cat results/orbslam3/trajectory_metrics.json
+
+      - name: Record build metadata
+        run: |
+          cat > results/orbslam3/build_metadata.json <<EOF
+          {
+            "orbslam3_commit": "$ORBSLAM3_SHA",
+            "pangolin_commit": "$PANGOLIN_SHA",
+            "dataset": "rgbd_dataset_freiburg3_walking_xyz",
+            "runner": "ubuntu-22.04",
+            "viewer": false
+          }
+          EOF
+
+      - name: Upload ORB-SLAM3 baseline artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: orbslam3-tum-fr3-walking-xyz-baseline
+          path: |
+            results/orbslam3/CameraTrajectory.txt
+            results/orbslam3/KeyFrameTrajectory.txt
+            results/orbslam3/trajectory_metrics.json
+            results/orbslam3/build_metadata.json
+          retention-days: 14

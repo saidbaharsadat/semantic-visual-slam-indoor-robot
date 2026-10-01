@@ -1,0 +1,25 @@
+camera:
+  fx: 535.4
+  fy: 539.2
+  cx: 320.1
+  cy: 247.6
+  depth_scale: 5000.0
+  width: 640
+  height: 480
+
+detector:
+  model: yolo26n-seg.pt
+  confidence: 0.35
+  iou: 0.55
+  device: auto
+  dynamic_classes:
+    - person
+
+mapping:
+  frame_step: 10
+  pixel_stride: 6
+  min_depth_m: 0.3
+  max_depth_m: 5.0
+  voxel_size_m: 0.03
+  max_pose_time_difference_s: 0.04
+  save_preview_every_n_frames: 0

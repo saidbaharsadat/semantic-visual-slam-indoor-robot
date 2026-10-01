@@ -53,7 +53,7 @@ jobs:
             --depth data/rgbd_dataset_freiburg3_walking_xyz/depth.txt \
             --output data/rgbd_dataset_freiburg3_walking_xyz/associations.txt
 
-      - name: Build lightweight semantic map
+      - name: Build filtered semantic map
         run: |
           python tools/build_semantic_map.py \
             --config configs/tum_fr3_walking.yaml \
@@ -63,16 +63,56 @@ jobs:
             --filter-dynamic \
             --frame-step 90
 
+      - name: Build unfiltered semantic map
+        run: |
+          python tools/build_semantic_map.py \
+            --config configs/tum_fr3_walking.yaml \
+            --dataset data/rgbd_dataset_freiburg3_walking_xyz \
+            --poses data/rgbd_dataset_freiburg3_walking_xyz/groundtruth.txt \
+            --output results/groundtruth_unfiltered_smoke \
+            --frame-step 90
+
+      - name: Compare filtered and unfiltered maps
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          filtered = json.loads(Path("results/groundtruth_filtered_smoke/run_metadata.json").read_text())
+          unfiltered = json.loads(Path("results/groundtruth_unfiltered_smoke/run_metadata.json").read_text())
+
+          comparison = {
+              "filtered_raw_points": filtered["raw_points"],
+              "unfiltered_raw_points": unfiltered["raw_points"],
+              "raw_points_removed": unfiltered["raw_points"] - filtered["raw_points"],
+              "raw_points_removed_percent": round(
+                  100.0 * (unfiltered["raw_points"] - filtered["raw_points"]) / unfiltered["raw_points"], 3
+              ) if unfiltered["raw_points"] else 0.0,
+              "filtered_downsampled_points": filtered["downsampled_points"],
+              "unfiltered_downsampled_points": unfiltered["downsampled_points"],
+              "filtered_object_observations": filtered["object_observations"],
+              "unfiltered_object_observations": unfiltered["object_observations"],
+              "processed_frames": filtered["processed_frames"],
+          }
+          Path("results/comparison.json").write_text(json.dumps(comparison, indent=2))
+          print(json.dumps(comparison, indent=2))
+          PY
+
       - name: Show run metadata
-        run: cat results/groundtruth_filtered_smoke/run_metadata.json
+        run: |
+          echo "Filtered:"
+          cat results/groundtruth_filtered_smoke/run_metadata.json
+          echo "Unfiltered:"
+          cat results/groundtruth_unfiltered_smoke/run_metadata.json
+          echo "Comparison:"
+          cat results/comparison.json
 
       - name: Upload experiment artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: tum-fr3-walking-xyz-semantic-map-smoke
+          name: tum-fr3-walking-xyz-semantic-map-comparison
           path: |
-            results/groundtruth_filtered_smoke/semantic_map.ply
-            results/groundtruth_filtered_smoke/object_observations.csv
-            results/groundtruth_filtered_smoke/frame_summary.csv
-            results/groundtruth_filtered_smoke/run_metadata.json
+            results/groundtruth_filtered_smoke/**
+            results/groundtruth_unfiltered_smoke/**
+            results/comparison.json
           retention-days: 14

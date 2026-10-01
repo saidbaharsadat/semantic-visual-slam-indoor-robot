@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import json
+from collections import Counter
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -113,11 +114,24 @@ class SemanticMapper:
             for item in self.frame_summaries:
                 writer.writerow(asdict(item))
 
+        class_counts = Counter(item.class_name for item in self.object_observations)
+        confidences = [item.confidence for item in self.object_observations]
+        object_summary = {
+            "total_observations": len(self.object_observations),
+            "dynamic_observations": sum(item.is_dynamic for item in self.object_observations),
+            "static_observations": sum(not item.is_dynamic for item in self.object_observations),
+            "mean_confidence": float(np.mean(confidences)) if confidences else 0.0,
+            "class_counts": dict(sorted(class_counts.items())),
+        }
+        with (output / "object_summary.json").open("w", encoding="utf-8") as handle:
+            json.dump(object_summary, handle, indent=2)
+
         summary = {
             "raw_points": int(before),
             "downsampled_points": int(len(points_out)),
             "object_observations": len(self.object_observations),
             "processed_frames": len(self.frame_summaries),
+            "object_summary": object_summary,
             **(metadata or {}),
         }
         with (output / "run_metadata.json").open("w", encoding="utf-8") as handle:

@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "semantic-visual-slam"
+version = "0.1.0"
+description = "Semantic RGB-D mapping with Visual SLAM, object perception, and dynamic-object filtering."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Said Bahar Sadat"}]
+dependencies = [
+  "numpy>=1.24",
+  "opencv-python>=4.8",
+  "open3d>=0.18",
+  "PyYAML>=6.0",
+  "tqdm>=4.66",
+  "ultralytics>=8.3"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -2,13 +2,6 @@ name: ORB-SLAM3 RGB-D baseline
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/orbslam3-baseline.yml"
-      - "tools/evaluate_trajectory.py"
-      - "src/semantic_slam/geometry.py"
-      - "src/semantic_slam/io.py"
 
 jobs:
   orbslam3-rgbd:

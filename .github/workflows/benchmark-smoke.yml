@@ -1,5 +1,8 @@
 name: TUM RGB-D benchmark smoke test
 
+permissions:
+  contents: write
+
 on:
   workflow_dispatch:
   push:
@@ -98,6 +101,26 @@ jobs:
           print(json.dumps(comparison, indent=2))
           PY
 
+      - name: Render map previews
+        run: |
+          python tools/render_map_preview.py \
+            --input results/groundtruth_filtered_smoke/semantic_map.ply \
+            --output docs/images/tum_filtered_topdown.png \
+            --title "Filtered semantic map (person pixels removed)"
+          python tools/render_map_preview.py \
+            --input results/groundtruth_unfiltered_smoke/semantic_map.ply \
+            --output docs/images/tum_unfiltered_topdown.png \
+            --title "Unfiltered semantic map"
+
+      - name: Commit preview images
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
+          git add docs/images/tum_filtered_topdown.png docs/images/tum_unfiltered_topdown.png
+          git diff --cached --quiet || git commit -m "docs: add TUM semantic map previews"
+          git push
+
       - name: Show run metadata
         run: |
           echo "Filtered:"
@@ -115,4 +138,6 @@ jobs:
             results/groundtruth_filtered_smoke/**
             results/groundtruth_unfiltered_smoke/**
             results/comparison.json
+            docs/images/tum_filtered_topdown.png
+            docs/images/tum_unfiltered_topdown.png
           retention-days: 14

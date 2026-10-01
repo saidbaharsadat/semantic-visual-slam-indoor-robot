@@ -1,8 +1,5 @@
 name: TUM RGB-D benchmark smoke test
 
-permissions:
-  contents: write
-
 on:
   workflow_dispatch:
   push:
@@ -113,19 +110,6 @@ jobs:
             --output docs/images/tum_unfiltered_topdown.png \
             --title "Unfiltered semantic map"
 
-      - name: Commit preview images
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin main
-          cp results/groundtruth_filtered_smoke/previews/frame_001.jpg docs/images/tum_detection_01.jpg
-          cp results/groundtruth_filtered_smoke/previews/frame_002.jpg docs/images/tum_detection_02.jpg
-          cp results/groundtruth_filtered_smoke/previews/frame_003.jpg docs/images/tum_detection_03.jpg
-          cp results/groundtruth_filtered_smoke/previews/frame_004.jpg docs/images/tum_detection_04.jpg
-          git add docs/images/tum_filtered_topdown.png docs/images/tum_unfiltered_topdown.png docs/images/tum_detection_0*.jpg
-          git diff --cached --quiet || git commit -m "docs: add TUM semantic map previews"
-          git push
-
       - name: Show run metadata
         run: |
           echo "Filtered:"
@@ -145,4 +129,5 @@ jobs:
             results/comparison.json
             docs/images/tum_filtered_topdown.png
             docs/images/tum_unfiltered_topdown.png
+            results/groundtruth_filtered_smoke/previews/**
           retention-days: 14

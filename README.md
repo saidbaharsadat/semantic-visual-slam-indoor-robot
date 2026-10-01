@@ -151,6 +151,29 @@ python tools/evaluate_trajectory.py \
   --ground-truth data/rgbd_dataset_freiburg3_walking_xyz/groundtruth.txt
 ```
 
+## First benchmark result
+
+A reproducible filtered-vs-unfiltered smoke experiment has now completed on the TUM RGB-D `freiburg3_walking_xyz` sequence using TUM ground-truth poses and a frame step of 90.
+
+| Metric | Unfiltered | Person-filtered |
+| --- | ---: | ---: |
+| Processed frames | 9 | 9 |
+| 3D object observations | 56 | 56 |
+| Raw map points | 37,262 | 28,744 |
+| Voxel-downsampled points | 20,998 | 16,396 |
+
+Dynamic-person filtering removed **8,518 raw 3D points (22.86%)** from the sampled reconstruction while preserving the same 56 semantic object observations.
+
+### Unfiltered semantic map
+
+![Top-down unfiltered semantic map](docs/images/tum_unfiltered_topdown.png)
+
+### Person-filtered semantic map
+
+![Top-down person-filtered semantic map](docs/images/tum_filtered_topdown.png)
+
+The figures above are generated automatically from the actual binary PLY outputs by `tools/render_map_preview.py`. The full filtered/unfiltered maps, CSV observations, metadata, and comparison JSON are produced by the GitHub Actions benchmark workflow.
+
 ## Research evidence we will add
 
 - annotated detection frames;

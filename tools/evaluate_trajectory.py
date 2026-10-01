@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import json
+from pathlib import Path
 
 import numpy as np
 
@@ -13,6 +15,7 @@ def main() -> None:
     parser.add_argument("--estimate", required=True)
     parser.add_argument("--ground-truth", required=True)
     parser.add_argument("--max-difference", type=float, default=0.02)
+    parser.add_argument("--output-json", default=None)
     args = parser.parse_args()
 
     estimated = load_tum_poses(args.estimate)
@@ -36,11 +39,26 @@ def main() -> None:
     aligned = (rotation @ est.T).T + translation
     errors = np.linalg.norm(aligned - gt, axis=1)
 
-    print(f"Matched poses: {len(errors)}")
-    print(f"ATE RMSE:      {np.sqrt(np.mean(errors ** 2)):.6f} m")
-    print(f"ATE mean:      {np.mean(errors):.6f} m")
-    print(f"ATE median:    {np.median(errors):.6f} m")
-    print(f"ATE max:       {np.max(errors):.6f} m")
+    metrics = {
+        "matched_poses": int(len(errors)),
+        "ate_rmse_m": float(np.sqrt(np.mean(errors ** 2))),
+        "ate_mean_m": float(np.mean(errors)),
+        "ate_median_m": float(np.median(errors)),
+        "ate_max_m": float(np.max(errors)),
+        "max_timestamp_difference_s": float(args.max_difference),
+    }
+
+    print(f"Matched poses: {metrics['matched_poses']}")
+    print(f"ATE RMSE:      {metrics['ate_rmse_m']:.6f} m")
+    print(f"ATE mean:      {metrics['ate_mean_m']:.6f} m")
+    print(f"ATE median:    {metrics['ate_median_m']:.6f} m")
+    print(f"ATE max:       {metrics['ate_max_m']:.6f} m")
+
+    if args.output_json:
+        output = Path(args.output_json)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
+        print(f"Saved metrics: {output}")
 
 
 if __name__ == "__main__":

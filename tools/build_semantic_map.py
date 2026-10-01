@@ -28,6 +28,33 @@ def load_or_create_associations(dataset: Path):
     return associate_timestamped_paths(rgb, depth, max_difference=0.02)
 
 
+def render_detection_preview(image_bgr, detections):
+    preview = image_bgr.copy()
+    overlay = preview.copy()
+
+    for detection in detections:
+        x1, y1, x2, y2 = map(int, detection.xyxy)
+        is_dynamic = detection.class_name == "person"
+        color = (0, 0, 255) if is_dynamic else (0, 180, 0)
+
+        overlay[detection.mask] = color
+        cv2.rectangle(preview, (x1, y1), (x2, y2), color, 2)
+        label = f"{detection.class_name} {detection.confidence:.2f}"
+        cv2.putText(
+            preview,
+            label,
+            (x1, max(20, y1 - 6)),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            color,
+            1,
+            cv2.LINE_AA,
+        )
+
+    preview = cv2.addWeighted(overlay, 0.28, preview, 0.72, 0)
+    return preview
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build a semantic RGB-D map from TUM-style data.")
     parser.add_argument("--config", required=True)
@@ -36,6 +63,12 @@ def main() -> None:
     parser.add_argument("--output", required=True)
     parser.add_argument("--filter-dynamic", action="store_true")
     parser.add_argument("--frame-step", type=int, default=None)
+    parser.add_argument(
+        "--preview-count",
+        type=int,
+        default=0,
+        help="Save annotated previews for the first N processed frames.",
+    )
     args = parser.parse_args()
 
     config_path = Path(args.config)
@@ -65,6 +98,7 @@ def main() -> None:
     max_pose_dt = float(config["mapping"].get("max_pose_time_difference_s", 0.04))
 
     used = skipped_pose = skipped_image = 0
+    preview_dir = output / "previews"
 
     for association in tqdm(associations[::frame_step], desc="Building semantic map"):
         pose = nearest_pose(poses, association.rgb_timestamp, max_difference=max_pose_dt)
@@ -87,6 +121,12 @@ def main() -> None:
             detections=detections,
             filter_dynamic=args.filter_dynamic,
         )
+
+        if args.preview_count > 0 and used < args.preview_count:
+            preview_dir.mkdir(parents=True, exist_ok=True)
+            preview = render_detection_preview(image, detections)
+            cv2.imwrite(str(preview_dir / f"frame_{used + 1:03d}.jpg"), preview)
+
         used += 1
 
     metadata = {
@@ -98,6 +138,7 @@ def main() -> None:
         "used_frames": used,
         "skipped_no_pose": skipped_pose,
         "skipped_image": skipped_image,
+        "preview_count": min(used, max(args.preview_count, 0)),
     }
     summary = mapper.save(output, metadata=metadata)
     print(json.dumps(summary, indent=2))

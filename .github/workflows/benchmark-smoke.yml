@@ -64,7 +64,8 @@ jobs:
             --poses data/rgbd_dataset_freiburg3_walking_xyz/groundtruth.txt \
             --output results/groundtruth_filtered_smoke \
             --filter-dynamic \
-            --frame-step 90
+            --frame-step 15 \
+            --preview-count 4
 
       - name: Build unfiltered semantic map
         run: |
@@ -73,7 +74,7 @@ jobs:
             --dataset data/rgbd_dataset_freiburg3_walking_xyz \
             --poses data/rgbd_dataset_freiburg3_walking_xyz/groundtruth.txt \
             --output results/groundtruth_unfiltered_smoke \
-            --frame-step 90
+            --frame-step 15
 
       - name: Compare filtered and unfiltered maps
         run: |
@@ -117,7 +118,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git pull --rebase origin main
-          git add docs/images/tum_filtered_topdown.png docs/images/tum_unfiltered_topdown.png
+          cp results/groundtruth_filtered_smoke/previews/frame_001.jpg docs/images/tum_detection_01.jpg
+          cp results/groundtruth_filtered_smoke/previews/frame_002.jpg docs/images/tum_detection_02.jpg
+          cp results/groundtruth_filtered_smoke/previews/frame_003.jpg docs/images/tum_detection_03.jpg
+          cp results/groundtruth_filtered_smoke/previews/frame_004.jpg docs/images/tum_detection_04.jpg
+          git add docs/images/tum_filtered_topdown.png docs/images/tum_unfiltered_topdown.png docs/images/tum_detection_0*.jpg
           git diff --cached --quiet || git commit -m "docs: add TUM semantic map previews"
           git push
 

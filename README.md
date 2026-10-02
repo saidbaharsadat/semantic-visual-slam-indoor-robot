@@ -4,19 +4,21 @@ An ongoing robotic-vision prototype for RGB-D object perception, semantic 3D map
 
 ## Project goals
 
-This repository turns the CV project into a reproducible implementation:
+This project explores how RGB-D perception can be used to build a simple semantic representation of an indoor environment.
 
-- detect and segment objects in RGB frames;
-- project recognized objects into 3D using aligned depth;
-- transform observations into a shared world frame;
-- build a semantic point-cloud map;
-- filter dynamic objects such as people from stable geometry;
-- compare filtered and unfiltered maps;
-- prepare the pipeline for later Visual SLAM integration and localization evaluation.
+The current work focuses on:
+
+- detecting and segmenting objects in RGB frames;
+- using aligned depth to estimate their 3D positions;
+- transforming observations into a common world coordinate frame;
+- building a semantic point-cloud representation of the scene;
+- reducing dynamic-scene artifacts by filtering people from the stable map;
+- comparing filtered and unfiltered reconstructions;
+- preparing the system for later integration with Visual SLAM-based camera poses.
 
 ## Current project stage
 
-The current prototype uses the TUM RGB-D `freiburg3_walking_xyz` sequence to validate object perception, 3D semantic mapping, and person filtering with benchmark camera poses. Full ORB-SLAM3 pose integration, live-camera operation, and robot deployment are intentionally kept as future milestones because this project is still ongoing.
+The current prototype uses the TUM RGB-D `freiburg3_walking_xyz` sequence to study object perception, 3D semantic mapping, and person filtering with benchmark camera poses. Visual SLAM pose integration, live-camera experiments, and mobile-robot deployment remain future extensions as the project develops.
 
 ## Pipeline
 

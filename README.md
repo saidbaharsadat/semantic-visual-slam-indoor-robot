@@ -27,9 +27,11 @@ RGB-D frames
    |
    +--> Object segmentation ----> semantic masks
    |
-   +--> Visual SLAM ------------> camera poses
-                                  |
-depth + masks + camera poses -----+
+   +--> Camera poses
+        current: TUM ground truth
+        planned: Visual SLAM
+                 |
+depth + masks + camera poses
                  |
                  v
         3D back-projection
@@ -46,17 +48,52 @@ depth + masks + camera poses -----+
         |                 |
         +--------+--------+
                  v
-             evaluation
+        qualitative + quantitative
+              evaluation
 ```
 
-## Technology stack
+## Tools and software used so far
 
-- Ultralytics YOLO segmentation for object perception
-- NumPy/OpenCV for RGB-D geometry and point-cloud export
-- OpenCV and NumPy for RGB-D processing and geometry
-- TUM RGB-D benchmark for reproducible evaluation
+| Tool / software | Current use |
+| --- | --- |
+| **Python** | Main implementation language for the perception and mapping pipeline |
+| **Ultralytics YOLO segmentation** | Object and person detection/segmentation in RGB frames |
+| **OpenCV** | RGB-D image loading, image processing, masks, and annotated detection previews |
+| **NumPy** | Camera geometry, 3D back-projection, coordinate transformations, and point-cloud processing |
+| **PyYAML** | Experiment and camera configuration |
+| **Matplotlib** | Rendering point-cloud result previews for comparison |
+| **pytest** | Unit testing for geometry and point-cloud utilities |
+| **Git / GitHub** | Version control, experiment tracking, documentation, and project management |
+| **GitHub Actions** | Reproducible testing and benchmark execution |
+| **TUM RGB-D Dataset** | Current indoor RGB-D benchmark, including synchronized RGB, depth, and ground-truth camera poses |
 
-ORB-SLAM3 is an external dependency and is not vendored into this repository.
+### Simulation status
+
+No robotics simulator has been used in the current experiments. The present stage is **dataset-based**, using the TUM RGB-D benchmark to validate the semantic perception and mapping components before moving to simulated or physical robot experiments.
+
+## Planned tools and simulation software
+
+| Tool / software | Planned use |
+| --- | --- |
+| **ORB-SLAM3** | Replace benchmark ground-truth poses with estimated RGB-D camera poses |
+| **ROS 2** | Connect perception, camera pose, mapping, and later robot components as separate nodes |
+| **Gazebo Sim** | Create a simple indoor mobile-robot simulation before physical deployment |
+| **RViz2** | Visualize camera poses, point clouds, semantic observations, and robot data |
+| **Intel RealSense / RealSense SDK** | Future live RGB-D experiments with a physical depth camera |
+| **Mobile robot platform** | Later validation of the perception pipeline while the robot moves in an indoor environment |
+
+These tools are planned extensions; they are not presented as part of the current completed prototype.
+
+## Future work
+
+The next development steps are intentionally incremental:
+
+1. **Improve current semantic-mapping experiments** by testing more frames and presenting additional annotated object-detection examples.
+2. **Study viewpoint consistency** by checking how the estimated 3D position of selected static objects changes across different observations.
+3. **Integrate Visual SLAM poses** using ORB-SLAM3 and perform a basic comparison against the current benchmark-pose version.
+4. **Test live RGB-D input** using a depth camera such as Intel RealSense.
+5. **Build a simple ROS 2 + Gazebo Sim experiment** to connect perception, mapping, and a simulated indoor mobile robot.
+6. **Move to a physical mobile robot** only after the perception and pose-integration stages are stable.
 
 ## Repository layout
 
@@ -143,18 +180,20 @@ Run the same command without `--filter-dynamic` to create an unfiltered comparis
 
 A later milestone will replace benchmark poses with an estimated RGB-D Visual SLAM trajectory and evaluate localization error. This is intentionally listed as future work rather than part of the current completed prototype.
 
-## First benchmark result
+## Current benchmark result
 
-A reproducible filtered-vs-unfiltered smoke experiment has now completed on the TUM RGB-D `freiburg3_walking_xyz` sequence using TUM ground-truth poses and a frame step of 90.
+A stronger filtered-vs-unfiltered experiment has been completed on the TUM RGB-D `freiburg3_walking_xyz` sequence using TUM ground-truth poses and a frame step of 15.
 
 | Metric | Unfiltered | Person-filtered |
 | --- | ---: | ---: |
-| Processed frames | 9 | 9 |
-| 3D object observations | 56 | 56 |
-| Raw map points | 37,262 | 28,744 |
-| Voxel-downsampled points | 20,998 | 16,396 |
+| Processed frames | 55 | 55 |
+| Semantic object observations | 319 | 319 |
+| Raw map points | 245,914 | 177,824 |
+| Voxel-downsampled points | 69,527 | 44,550 |
 
-Dynamic-person filtering removed **8,518 raw 3D points (22.86%)** from the sampled reconstruction while preserving the same 56 semantic object observations.
+The current run produced **319 semantic observations** across the sampled frames, including **71 person observations** and **248 static-object observations**, with a mean detection confidence of approximately **0.714**.
+
+Dynamic-person filtering removed **68,090 raw 3D points (27.69%)** from the sampled reconstruction while keeping the semantic observation records available for analysis.
 
 ### Unfiltered semantic map
 
@@ -166,15 +205,15 @@ Dynamic-person filtering removed **8,518 raw 3D points (22.86%)** from the sampl
 
 The figures above are generated automatically from the actual binary PLY outputs by `tools/render_map_preview.py`. The full filtered/unfiltered maps, CSV observations, metadata, and comparison JSON are produced by the GitHub Actions benchmark workflow.
 
-## Research evidence we will add
+## Current evidence
 
-- annotated detection frames;
-- filtered vs unfiltered semantic maps;
-- trajectory plots;
-- ATE/RMSE tables;
-- object observation statistics;
-- viewpoint-consistency analysis;
-- a live RGB-D demo;
-- later, ROS 2/mobile-robot integration.
+- synchronized RGB-D benchmark processing;
+- YOLO object/person segmentation;
+- depth-based 3D object localization;
+- semantic point-cloud generation;
+- filtered vs. unfiltered reconstruction comparison;
+- semantic observation statistics;
+- annotated detection previews;
+- reproducible benchmark workflow.
 
-See `docs/milestones.md` for the implementation roadmap.
+See `docs/milestones.md` for the implementation roadmap and the separation between current work and future extensions.

@@ -1,6 +1,6 @@
 # Implementation Milestones
 
-> Current CV scope: **M0-M4**. M5 and later are future extensions and are not required to support the current ongoing-project claim.
+> Current project scope: **M0-M4**. M5 and later are planned extensions as the system develops.
 
 ## M0 — Repository and reproducibility
 - Create GitHub repository.

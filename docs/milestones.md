@@ -1,6 +1,6 @@
 # Implementation Milestones
 
-> Current project scope: **M0-M4**. M5 and later are planned extensions as the system develops.
+> Completed foundation: **M0-M4**. The project is now progressing through the remaining software-completion milestones.
 
 ## M0 — Repository and reproducibility
 - Create GitHub repository.
@@ -38,7 +38,7 @@
 
 **Evidence:** side-by-side qualitative comparison and map statistics.
 
-## Future M5 — ORB-SLAM3 baseline
+## M5 — ORB-SLAM3 baseline (in progress)
 - Compile ORB-SLAM3.
 - Run the RGB-D TUM example.
 - Save `CameraTrajectory.txt`.
@@ -46,26 +46,26 @@
 
 **Evidence:** trajectory plot and ATE/RMSE.
 
-## Future M6 — SLAM + semantic map integration
+## M6 — SLAM + semantic map integration
 - Replace ground-truth poses with ORB-SLAM3 poses.
 - Rebuild filtered and unfiltered semantic maps.
 - Compare map quality and localization stability.
 
-## Future M7 — Dynamic-aware SLAM front-end
+## Optional M7 — Dynamic-aware SLAM front-end
 - Reject visual features inside dynamic masks.
 - Compare camera trajectory error with baseline ORB-SLAM3.
 
-## Future M8 — Semantic consistency across viewpoints
+## M7 — Semantic consistency across viewpoints
 - Associate repeated detections in 3D.
 - Fuse repeated object observations.
 - Track semantic landmark position variance.
 
-## Future M9 — Live RGB-D camera
+## Optional hardware extension — Live RGB-D camera
 - Add a RealSense or another RGB-D sensor.
 - Calibrate and run online mapping.
 - Record a custom indoor sequence.
 
-## Future M10 — Mobile robot integration
+## Optional hardware extension — Mobile robot integration
 - Mount the RGB-D camera on a mobile base.
 - Integrate pose/map data with ROS 2.
 - Demonstrate indoor robotic perception while moving.

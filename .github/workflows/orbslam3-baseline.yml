@@ -59,6 +59,31 @@ jobs:
           git clone https://github.com/UZ-SLAMLab/ORB_SLAM3.git /tmp/ORB_SLAM3
           cd /tmp/ORB_SLAM3
           git checkout "$ORBSLAM3_SHA"
+          # This pinned ORB-SLAM3 revision forces C++11 in its top-level CMakeLists.
+          # Pangolin 0.9.6 installs sigslot headers which require a newer standard.
+          # Remove that outdated override and require C++17 instead.
+          python - <<'PY'
+          from pathlib import Path
+
+          cmake_file = Path("CMakeLists.txt")
+          content = cmake_file.read_text(encoding="utf-8")
+          start_marker = "# Check C++11 or C++0x support"
+          end_marker = "LIST(APPEND CMAKE_MODULE_PATH"
+          if content.count(start_marker) != 1 or content.count(end_marker) != 1:
+              raise RuntimeError("Unexpected upstream ORB-SLAM3 CMakeLists structure")
+          start = content.index(start_marker)
+          end = content.index(end_marker, start)
+          replacement = (
+              "# Pangolin 0.9.6 sigslot headers need modern C++ support.\\n"
+              "set(CMAKE_CXX_STANDARD 17)\\n"
+              "set(CMAKE_CXX_STANDARD_REQUIRED ON)\\n"
+              "set(CMAKE_CXX_EXTENSIONS OFF)\\n"
+              'message(STATUS "Using C++17 for ORB-SLAM3")\\n\\n'
+          )
+          cmake_file.write_text(content[:start] + replacement + content[end:], encoding="utf-8")
+          PY
+          # Reduce peak memory use of third-party and ORB-SLAM3 builds.
+          sed -i 's/make -j4/make -j2/; s/make -j$/make -j2/' build.sh
           sed -i 's/ORB_SLAM3::System::RGBD,true/ORB_SLAM3::System::RGBD,false/' Examples/RGB-D/rgbd_tum.cc
           chmod +x build.sh
           ./build.sh

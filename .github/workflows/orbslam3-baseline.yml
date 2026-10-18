@@ -74,11 +74,11 @@ jobs:
           start = content.index(start_marker)
           end = content.index(end_marker, start)
           replacement = (
-              "# Pangolin 0.9.6 sigslot headers need modern C++ support.\\n"
-              "set(CMAKE_CXX_STANDARD 17)\\n"
-              "set(CMAKE_CXX_STANDARD_REQUIRED ON)\\n"
-              "set(CMAKE_CXX_EXTENSIONS OFF)\\n"
-              'message(STATUS "Using C++17 for ORB-SLAM3")\\n\\n'
+              "# Pangolin 0.9.6 sigslot headers need modern C++ support.\n"
+              "set(CMAKE_CXX_STANDARD 17)\n"
+              "set(CMAKE_CXX_STANDARD_REQUIRED ON)\n"
+              "set(CMAKE_CXX_EXTENSIONS OFF)\n"
+              'message(STATUS "Using C++17 for ORB-SLAM3")\n\n'
           )
           cmake_file.write_text(content[:start] + replacement + content[end:], encoding="utf-8")
           PY

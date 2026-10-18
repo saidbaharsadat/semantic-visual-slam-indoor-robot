@@ -2,6 +2,10 @@ name: ORB-SLAM3 RGB-D baseline
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/orbslam3-baseline.yml"
 
 jobs:
   orbslam3-rgbd:

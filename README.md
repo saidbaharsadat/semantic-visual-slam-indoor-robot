@@ -1,6 +1,6 @@
 # Semantic Visual SLAM for Indoor Mobile Robot Perception
 
-An ongoing robotic-vision prototype for RGB-D object perception, semantic 3D mapping, and basic dynamic-object filtering. The current implementation validates the semantic-mapping pipeline with benchmark camera poses; full Visual SLAM integration is planned as future work.
+An RGB-D robotic-vision research prototype integrating ORB-SLAM3 estimated camera poses, YOLO instance segmentation, depth-based semantic mapping, and person masking. An integrated experiment has been run locally on the TUM RGB-D `freiburg3_walking_xyz` sequence. This remains a dataset-based prototype, not a validated live robot system.
 
 ## Project goals
 
@@ -18,7 +18,7 @@ The current work focuses on:
 
 ## Current project stage
 
-The current prototype uses the TUM RGB-D `freiburg3_walking_xyz` sequence to study object perception, 3D semantic mapping, and person filtering with benchmark camera poses. Visual SLAM pose integration, live-camera experiments, and mobile-robot deployment remain future extensions as the project develops.
+The prototype has two evaluated pose sources: TUM benchmark ground truth (earlier baseline) and **ORB-SLAM3 estimated RGB-D poses (integrated locally on 2026-10-19)**. Live camera, ROS 2 simulation, physical robot deployment and dynamic-mask feedback into SLAM feature tracking have **not** been implemented.
 
 ## Pipeline
 
@@ -28,8 +28,8 @@ RGB-D frames
    +--> Object segmentation ----> semantic masks
    |
    +--> Camera poses
-        current: TUM ground truth
-        planned: Visual SLAM
+        TUM ground truth (benchmark baseline)
+        ORB-SLAM3 estimate (integrated run)
                  |
 depth + masks + camera poses
                  |
@@ -62,7 +62,8 @@ depth + masks + camera poses
 | **NumPy** | Camera geometry, 3D back-projection, coordinate transformations, and point-cloud processing |
 | **PyYAML** | Experiment and camera configuration |
 | **Matplotlib** | Rendering point-cloud result previews for comparison |
-| **pytest** | Unit testing for geometry and point-cloud utilities |
+| **pytest** | Unit testing for geometry, point-cloud and consistency utilities |
+| **ORB-SLAM3 (C++) / Pangolin** | Estimated RGB-D camera trajectory from the TUM sequence (local WSL2 run; pinned upstream version) |
 | **Git / GitHub** | Version control, experiment tracking, documentation, and project management |
 | **GitHub Actions** | Reproducible testing and benchmark execution |
 | **TUM RGB-D Dataset** | Current indoor RGB-D benchmark, including synchronized RGB, depth, and ground-truth camera poses |
@@ -75,25 +76,21 @@ No robotics simulator has been used in the current experiments. The present stag
 
 | Tool / software | Planned use |
 | --- | --- |
-| **ORB-SLAM3** | Replace benchmark ground-truth poses with estimated RGB-D camera poses |
 | **ROS 2** | Connect perception, camera pose, mapping, and later robot components as separate nodes |
 | **Gazebo Sim** | Create a simple indoor mobile-robot simulation before physical deployment |
 | **RViz2** | Visualize camera poses, point clouds, semantic observations, and robot data |
 | **Intel RealSense / RealSense SDK** | Future live RGB-D experiments with a physical depth camera |
 | **Mobile robot platform** | Later validation of the perception pipeline while the robot moves in an indoor environment |
 
-These tools are planned extensions; they are not presented as part of the current completed prototype.
+These remain **optional future extensions**; they are not claimed as implemented.
 
-## Future work
+## Remaining validation and optional extensions
 
-The next development steps are intentionally incremental:
-
-1. **Improve current semantic-mapping experiments** by testing more frames and presenting additional annotated object-detection examples.
-2. **Study viewpoint consistency** by checking how the estimated 3D position of selected static objects changes across different observations.
-3. **Integrate Visual SLAM poses** using ORB-SLAM3 and perform a basic comparison against the current benchmark-pose version.
-4. **Test live RGB-D input** using a depth camera such as Intel RealSense.
-5. **Build a simple ROS 2 + Gazebo Sim experiment** to connect perception, mapping, and a simulated indoor mobile robot.
-6. **Move to a physical mobile robot** only after the perception and pose-integration stages are stable.
+1. Publish reproducible matched-axis map figures and a trajectory visualization.
+2. Compare reconstruction quality more rigorously; person-point removal does not quantify map fidelity.
+3. Improve camera pose accuracy and evaluate on additional RGB-D sequences.
+4. Optional: feed dynamic masks back into the Visual SLAM tracking front-end.
+5. Optional: demonstrate ROS 2, Gazebo, live RGB-D camera, or a physical robot.
 
 ## Repository layout
 
@@ -176,11 +173,40 @@ run_metadata.json
 
 Run the same command without `--filter-dynamic` to create an unfiltered comparison map.
 
-## Planned next stage: Visual SLAM integration
+## Integrated ORB-SLAM3 + YOLO experiment (2026-10-19 local WSL2 run)
 
-A later milestone will replace benchmark poses with an estimated RGB-D Visual SLAM trajectory and evaluate localization error. This is intentionally listed as future work rather than part of the current completed prototype.
+The RGB-D ORB-SLAM3 example produced `CameraTrajectory.txt` and `KeyFrameTrajectory.txt` on TUM `freiburg3_walking_xyz`. Python mapping then used the estimated `CameraTrajectory.txt` rather than ground-truth poses. The local experiment used YOLO segmentation, back-projected RGB-D geometry, and the same estimated camera poses to construct the unfiltered and person-filtered maps.
 
-## Current benchmark result
+**Trajectory evaluation:** 826 matched poses after timestamp matching; rigidly aligned ATE RMSE **0.583068 m** (mean 0.512931 m, median 0.447341 m, maximum 1.178976 m). This is a functioning estimated-pose baseline, but it is **not** evidence of precise indoor localization.
+
+| Estimated-pose experiment (frame step 15) | Unfiltered | Person-filtered |
+| --- | ---: | ---: |
+| Processed frames | 56 | 56 |
+| Semantic detection observations | 328 | 328 |
+| Raw 3D points | 251,323 | 181,231 |
+| Voxel-downsampled map points | 119,869 | 94,213 |
+
+Both runs include 73 person observations and 255 static-class observations. Person masking excluded **70,092 raw sampled points (27.89%)**. These are repeated detections, **not unique objects**. Point reduction alone does not establish a gain in map accuracy or SLAM localization stability.
+
+**Preliminary viewpoint-consistency experiment:** same-class spatial clustering (0.6 m radius, minimum 3 observations per reported cluster) grouped **244 of 255 static observations into 13 repeated clusters**, with a **0.206231 m observation-weighted mean distance to cluster centroid**. Clusters are **not verified physical-object identities**; the metric depends on cluster thresholds and pose accuracy.
+
+These results were observed in a **local Windows 11 / Ubuntu 22.04 WSL2 run**. Large PLY outputs, weight files, trajectories and final figures remain on the local machine; GitHub Actions validation and public upload of final figures are separate steps.
+
+**Reproduce semantic mapping after creating the ORB-SLAM3 trajectory** (from the repository root with the TUM dataset downloaded):
+
+```bash
+python tools/build_semantic_map.py \
+  --config configs/tum_fr3_walking.yaml \
+  --dataset ~/slam_data/rgbd_dataset_freiburg3_walking_xyz \
+  --poses ~/slam_data/orbslam3_results/CameraTrajectory.txt \
+  --output ~/slam_data/orbslam3_results/final_filtered \
+  --frame-step 15 --filter-dynamic
+python tools/analyze_viewpoint_consistency.py \
+  --observations ~/slam_data/orbslam3_results/final_filtered/object_observations.csv \
+  --output-json ~/slam_data/orbslam3_results/viewpoint_consistency.json
+```
+
+## Earlier ground-truth-pose benchmark result
 
 A stronger filtered-vs-unfiltered experiment has been completed on the TUM RGB-D `freiburg3_walking_xyz` sequence using TUM ground-truth poses and a frame step of 15.
 
@@ -203,7 +229,14 @@ Dynamic-person filtering removed **68,090 raw 3D points (27.69%)** from the samp
 
 ![Top-down person-filtered semantic map](docs/images/tum_filtered_topdown.png)
 
-The figures above are generated automatically from the actual binary PLY outputs by `tools/render_map_preview.py`. The full filtered/unfiltered maps, CSV observations, metadata, and comparison JSON are produced by the GitHub Actions benchmark workflow.
+The figures above depict the **earlier benchmark-pose baseline**. They do **not** depict the 2026-10-19 estimated-pose experiment. For a fair local estimated-pose comparison, use fixed World X and Z axis limits:
+
+```bash
+python tools/render_map_preview.py --input ~/slam_data/orbslam3_results/final_unfiltered/semantic_map.ply --output ~/slam_data/orbslam3_results/unfiltered_matched.png --title 'ORB-SLAM3 Unfiltered Map' --xlim -5 5 --zlim 0 6
+python tools/render_map_preview.py --input ~/slam_data/orbslam3_results/final_filtered/semantic_map.ply --output ~/slam_data/orbslam3_results/filtered_matched.png --title 'ORB-SLAM3 Person-Filtered Map' --xlim -5 5 --zlim 0 6
+```
+
+The full maps, CSV observations, and run metadata are generated locally or in the benchmark workflow; the matched-axis PNGs are not yet committed.
 
 ## Current evidence
 

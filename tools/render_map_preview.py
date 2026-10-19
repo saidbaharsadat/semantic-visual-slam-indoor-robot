@@ -53,7 +53,19 @@ def main() -> None:
     parser.add_argument("--output", required=True)
     parser.add_argument("--title", required=True)
     parser.add_argument("--max-points", type=int, default=25000)
+    parser.add_argument(
+        "--xlim", nargs=2, type=float, metavar=("MIN_X", "MAX_X"),
+        help="Optional fixed World X limits in meters for fair map comparisons.",
+    )
+    parser.add_argument(
+        "--zlim", nargs=2, type=float, metavar=("MIN_Z", "MAX_Z"),
+        help="Optional fixed World Z limits in meters for fair map comparisons.",
+    )
     args = parser.parse_args()
+    if args.xlim is not None and args.xlim[0] >= args.xlim[1]:
+        parser.error("--xlim requires MIN_X < MAX_X")
+    if args.zlim is not None and args.zlim[0] >= args.zlim[1]:
+        parser.error("--zlim requires MIN_Z < MAX_Z")
 
     points, colors = read_binary_ply(args.input)
     if len(points) > args.max_points:
@@ -70,6 +82,10 @@ def main() -> None:
     ax.set_ylabel("World Z (m)")
     ax.set_title(args.title)
     ax.set_aspect("equal", adjustable="box")
+    if args.xlim is not None:
+        ax.set_xlim(*args.xlim)
+    if args.zlim is not None:
+        ax.set_ylim(*args.zlim)
     ax.grid(True, alpha=0.2)
     fig.tight_layout()
     fig.savefig(output, bbox_inches="tight")

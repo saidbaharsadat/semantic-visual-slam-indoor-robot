@@ -21,7 +21,6 @@ def main() -> None:
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("w", encoding="utf-8") as handle:
-        handle.write("# rgb_timestamp rgb_path depth_timestamp depth_path\n")
         for row in matches:
             handle.write(
                 f"{row.rgb_timestamp:.6f} {row.rgb_path} "

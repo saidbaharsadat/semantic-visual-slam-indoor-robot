@@ -55,10 +55,10 @@
 - Reject visual features inside dynamic masks.
 - Compare camera trajectory error with baseline ORB-SLAM3.
 
-## M7 — Semantic consistency across viewpoints
+## M7 — Semantic consistency across viewpoints (preliminary analysis complete)
 - Associate repeated detections in 3D.
 - Fuse repeated object observations.
-- Track semantic landmark position variance.
+- Measure observation spread within same-class spatial clusters (preliminary complete; physical-object identity not validated).
 
 ## Optional hardware extension — Live RGB-D camera
 - Add a RealSense or another RGB-D sensor.

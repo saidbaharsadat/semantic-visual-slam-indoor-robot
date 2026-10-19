@@ -82,6 +82,10 @@ jobs:
           )
           cmake_file.write_text(content[:start] + replacement + content[end:], encoding="utf-8")
           PY
+          # This pinned revision incorrectly declares the global BA generation
+          # counter as bool even though LoopClosing.cc increments and compares it.
+          sed -i 's/bool mnFullBAIdx;/int mnFullBAIdx;/' include/LoopClosing.h
+          grep -Eq '^[[:space:]]*int mnFullBAIdx;' include/LoopClosing.h
           # Reduce peak memory use of third-party and ORB-SLAM3 builds.
           sed -i 's/make -j4/make -j2/; s/make -j$/make -j2/' build.sh
           sed -i 's/ORB_SLAM3::System::RGBD,true/ORB_SLAM3::System::RGBD,false/' Examples/RGB-D/rgbd_tum.cc

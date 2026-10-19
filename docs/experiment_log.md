@@ -13,3 +13,9 @@
 The October 19 estimated-pose results were run locally on Ubuntu 22.04 in WSL2 and reported via terminal screenshots. The saved PLY files, model weights, full trajectory and result JSON remain on the local machine; this repository does not yet include the final visualization images or machine-readable run artifacts.
 
 Point-count reduction measures dynamic-mask exclusion, **not** an improvement in pose-estimation accuracy or ground-truth map fidelity. The ORB-SLAM3 baseline has substantial ATE error. Before comparing SLAM-pose and ground-truth-pose maps spatially, align their coordinate frames and use comparable frame selection. Static-object viewpoint consistency and final map previews are pending.
+
+### Qualitative review of the estimated-pose maps (2026-10-19)
+
+Local preview images (`unfiltered_preview.png`, `filtered_preview.png`) were generated and reviewed. Both World X-Z projections show a dense reconstructed central region, with scattered background/outlier points. The person-filtered map retains much of the main geometry while reducing some lower-central structures. The individual plot autoscaling differs, so the previews are not yet a pixel-aligned qualitative comparison. The images do not independently establish better geometric accuracy, and the earlier trajectory ATE error remains a limitation. The preview PNGs have not yet been committed to the repository.
+
+Next: produce matched-axis previews, run the repeated-static-observation consistency analysis, and review the resulting cluster statistics before updating the final README.

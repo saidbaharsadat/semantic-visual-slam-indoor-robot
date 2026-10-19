@@ -88,8 +88,10 @@ jobs:
           grep -Eq '^[[:space:]]*int mnFullBAIdx;' include/LoopClosing.h
           # Reduce peak memory use of third-party and ORB-SLAM3 builds.
           sed -i 's/make -j4/make -j2/; s/make -j$/make -j2/' build.sh
-          # std::chrono::monotonic_clock is not standard C++; use steady_clock.
-          sed -i 's/std::chrono::monotonic_clock/std::chrono::steady_clock/g' Examples/RGB-D/rgbd_tum.cc
+          # Older examples across RGB-D, stereo, and monocular modes use
+          # the nonstandard monotonic_clock spelling; fix all C++ example sources.
+          grep -rlZ 'std::chrono::monotonic_clock' Examples --include='*.cc' --include='*.cpp' |
+            xargs -0 -r sed -i 's/std::chrono::monotonic_clock/std::chrono::steady_clock/g'
           sed -i 's/ORB_SLAM3::System::RGBD,true/ORB_SLAM3::System::RGBD,false/' Examples/RGB-D/rgbd_tum.cc
           chmod +x build.sh
           ./build.sh

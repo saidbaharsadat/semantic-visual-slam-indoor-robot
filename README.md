@@ -229,17 +229,21 @@ Dynamic-person filtering removed **68,090 raw 3D points (27.69%)** from the samp
 
 ![Top-down person-filtered semantic map](docs/images/tum_filtered_topdown.png)
 
-The figures above depict the **earlier benchmark-pose baseline**. They do **not** depict the 2026-10-19 estimated-pose experiment. For a fair local estimated-pose comparison, use fixed World X and Z axis limits:
+The figures above depict the **earlier benchmark-pose baseline**. They do **not** depict the 2026-10-19 estimated-pose experiment. The locally generated estimated-pose figures are currently pending upload to `docs/images/`: `unfiltered_matched.png`, `filtered_matched.png`, and `trajectory_comparison.png`. For a fair local estimated-pose comparison, use fixed World X and Z axis limits:
 
 ```bash
 python tools/render_map_preview.py --input ~/slam_data/orbslam3_results/final_unfiltered/semantic_map.ply --output ~/slam_data/orbslam3_results/unfiltered_matched.png --title 'ORB-SLAM3 Unfiltered Map' --xlim -5 5 --zlim 0 6
 python tools/render_map_preview.py --input ~/slam_data/orbslam3_results/final_filtered/semantic_map.ply --output ~/slam_data/orbslam3_results/filtered_matched.png --title 'ORB-SLAM3 Person-Filtered Map' --xlim -5 5 --zlim 0 6
 ```
 
-The full maps, CSV observations, and run metadata are generated locally or in the benchmark workflow; the matched-axis PNGs are not yet committed.
+The full maps, CSV observations, and raw trajectory files remain local. Machine-readable summaries for the measured local ORB-SLAM3 experiments are committed under [`docs/results/`](docs/results/). The three final estimated-pose PNGs and the demonstration MP4 are not yet uploaded.
 
 ## Current evidence
 
+- locally compiled and executed ORB-SLAM3 RGB-D trajectory estimation;
+- trajectory metrics and a separate BGR configuration sensitivity summary in `docs/results/`;
+- locally generated, matched-scale estimated-pose map comparisons and trajectory visualization (PNG upload still pending);
+- preliminary viewpoint-consistency metrics in `docs/results/viewpoint_consistency_summary.json`;
 - synchronized RGB-D benchmark processing;
 - YOLO object/person segmentation;
 - depth-based 3D object localization;

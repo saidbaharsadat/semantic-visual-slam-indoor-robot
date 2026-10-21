@@ -38,7 +38,7 @@
 
 **Evidence:** side-by-side qualitative comparison and map statistics.
 
-## M5 — ORB-SLAM3 baseline (measured; trajectory visualization pending)
+## M5 — ORB-SLAM3 baseline (measured; final figure upload pending)
 - Compile ORB-SLAM3.
 - Run the RGB-D TUM example.
 - Save `CameraTrajectory.txt`.
@@ -46,7 +46,7 @@
 
 **Evidence:** trajectory plot and ATE/RMSE.
 
-## M6 — SLAM + semantic map integration (mapped; qualitative review ongoing)
+## M6 — SLAM + semantic map integration (local experiment completed; media upload pending)
 - Replace ground-truth poses with ORB-SLAM3 poses.
 - Rebuild filtered and unfiltered semantic maps.
 - Compare map quality and localization stability.

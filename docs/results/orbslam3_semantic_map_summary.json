@@ -1,0 +1,23 @@
+{
+  "experiment": "TUM RGB-D freiburg3_walking_xyz with ORB-SLAM3 estimated camera poses",
+  "run_location": "Local Windows 11 / Ubuntu 22.04 WSL2",
+  "frame_step": 15,
+  "processed_frames": 56,
+  "object_observations": 328,
+  "dynamic_person_observations": 73,
+  "static_class_observations": 255,
+  "mean_detection_confidence": 0.7156374469036009,
+  "unfiltered": {
+    "raw_points": 251323,
+    "downsampled_points": 119869,
+    "dynamic_filter": false
+  },
+  "person_filtered": {
+    "raw_points": 181231,
+    "downsampled_points": 94213,
+    "dynamic_filter": true
+  },
+  "raw_points_excluded": 70092,
+  "raw_point_reduction_percent": 27.89,
+  "limitation": "Point removal measures dynamic-mask exclusion, not improvement in localization or map accuracy. Observations are detections across frames, not unique objects."
+}

@@ -10,7 +10,7 @@
 
 ### Provenance and limitations
 
-The October 19 estimated-pose results were run locally on Ubuntu 22.04 in WSL2 and reported via terminal screenshots. The saved PLY files, model weights, full trajectories and raw per-frame result files remain on the local machine. Compact machine-readable summaries have now been committed under `docs/results/`; final visualization images and the demonstration video are still awaiting upload.
+The October 19 estimated-pose results were run locally on Ubuntu 22.04 in WSL2 and reported via terminal screenshots. The saved PLY files, model weights, full trajectories and raw per-frame result files remain on the local machine. Compact machine-readable summaries are committed under `docs/results/`. The three final estimated-pose visualization PNGs are now present in `docs/images/`, and the demonstration video is published as a GitHub Release asset.
 
 Point-count reduction measures dynamic-mask exclusion, **not** an improvement in pose-estimation accuracy or ground-truth map fidelity. The ORB-SLAM3 baseline has substantial ATE error. Before comparing SLAM-pose and ground-truth-pose maps spatially, align their coordinate frames and use comparable frame selection. Static-object viewpoint consistency was evaluated locally on 2026-10-19. Matched-axis estimated-pose preview images and trajectory plots remain pending.
 
@@ -18,7 +18,7 @@ Point-count reduction measures dynamic-mask exclusion, **not** an improvement in
 
 Local preview images (`unfiltered_preview.png`, `filtered_preview.png`) were generated and reviewed. Both World X-Z projections show a dense reconstructed central region, with scattered background/outlier points. The person-filtered map retains much of the main geometry while reducing some lower-central structures. The individual plot autoscaling differs, so the previews are not yet a pixel-aligned qualitative comparison. The images do not independently establish better geometric accuracy, and the earlier trajectory ATE error remains a limitation. The matched-axis preview PNGs were generated locally; their upload to the repository is still pending.
 
-Next: render matched-axis estimated-pose map previews, add the trajectory visualization, and publish the final locally generated evidence. The README now documents estimated-pose integration.
+Matched-axis estimated-pose map previews and the trajectory visualization were generated locally and uploaded to `docs/images/` on 2026-10-21. The README now embeds the three figures and links to the demonstration release.
 
 ### Preliminary static-observation consistency (2026-10-19; local)
 

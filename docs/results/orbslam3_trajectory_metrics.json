@@ -1,0 +1,11 @@
+{
+  "experiment": "TUM RGB-D freiburg3_walking_xyz — original local ORB-SLAM3 RGB-D run",
+  "run_location": "Local Windows 11 / Ubuntu 22.04 WSL2",
+  "matched_poses": 826,
+  "ate_rmse_m": 0.583068,
+  "ate_mean_m": 0.512931,
+  "ate_median_m": 0.447341,
+  "ate_max_m": 1.178976,
+  "max_timestamp_difference_s": 0.03,
+  "note": "Trajectory aligned rigidly to TUM ground truth. This is a measured local baseline; error remains substantial."
+}

@@ -10,13 +10,13 @@
 
 ### Provenance and limitations
 
-The October 19 estimated-pose results were run locally on Ubuntu 22.04 in WSL2 and reported via terminal screenshots. The saved PLY files, model weights, full trajectory and result JSON remain on the local machine; this repository does not yet include the final visualization images or machine-readable run artifacts.
+The October 19 estimated-pose results were run locally on Ubuntu 22.04 in WSL2 and reported via terminal screenshots. The saved PLY files, model weights, full trajectories and raw per-frame result files remain on the local machine. Compact machine-readable summaries have now been committed under `docs/results/`; final visualization images and the demonstration video are still awaiting upload.
 
 Point-count reduction measures dynamic-mask exclusion, **not** an improvement in pose-estimation accuracy or ground-truth map fidelity. The ORB-SLAM3 baseline has substantial ATE error. Before comparing SLAM-pose and ground-truth-pose maps spatially, align their coordinate frames and use comparable frame selection. Static-object viewpoint consistency was evaluated locally on 2026-10-19. Matched-axis estimated-pose preview images and trajectory plots remain pending.
 
 ### Qualitative review of the estimated-pose maps (2026-10-19)
 
-Local preview images (`unfiltered_preview.png`, `filtered_preview.png`) were generated and reviewed. Both World X-Z projections show a dense reconstructed central region, with scattered background/outlier points. The person-filtered map retains much of the main geometry while reducing some lower-central structures. The individual plot autoscaling differs, so the previews are not yet a pixel-aligned qualitative comparison. The images do not independently establish better geometric accuracy, and the earlier trajectory ATE error remains a limitation. The preview PNGs have not yet been committed to the repository.
+Local preview images (`unfiltered_preview.png`, `filtered_preview.png`) were generated and reviewed. Both World X-Z projections show a dense reconstructed central region, with scattered background/outlier points. The person-filtered map retains much of the main geometry while reducing some lower-central structures. The individual plot autoscaling differs, so the previews are not yet a pixel-aligned qualitative comparison. The images do not independently establish better geometric accuracy, and the earlier trajectory ATE error remains a limitation. The matched-axis preview PNGs were generated locally; their upload to the repository is still pending.
 
 Next: render matched-axis estimated-pose map previews, add the trajectory visualization, and publish the final locally generated evidence. The README now documents estimated-pose integration.
 
@@ -32,4 +32,4 @@ Next: render matched-axis estimated-pose map previews, add the trajectory visual
 | Observations in repeated clusters | 244 (95.7%) |
 | Observation-weighted mean cluster-centroid distance | 0.206231 m |
 
-Representative clusters: TV (46 observations, 0.205 m mean deviation); TV (45, 0.184 m); chair (34, 0.226 m); chair (27, 0.308 m); keyboard (25, 0.225 m). These are spatially associated observations, **not independently validated object identities**. The statistics do not measure camera trajectory error or true 3D landmark accuracy, and the 0.6 m clustering threshold affects the output. Values were calculated locally using `tools/analyze_viewpoint_consistency.py` and shared via the saved JSON / terminal output; full machine-readable artifacts have not been added to the repository.
+Representative clusters: TV (46 observations, 0.205 m mean deviation); TV (45, 0.184 m); chair (34, 0.226 m); chair (27, 0.308 m); keyboard (25, 0.225 m). These are spatially associated observations, **not independently validated object identities**. The statistics do not measure camera trajectory error or true 3D landmark accuracy, and the 0.6 m clustering threshold affects the output. Values were calculated locally using `tools/analyze_viewpoint_consistency.py` and shared via the saved JSON / terminal output; A compact summary has been committed as `docs/results/viewpoint_consistency_summary.json`; the full per-cluster JSON remains local.

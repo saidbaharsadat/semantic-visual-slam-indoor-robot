@@ -1,0 +1,12 @@
+{
+  "experiment": "TUM RGB-D freiburg3_walking_xyz — local RGB channel setting sensitivity run",
+  "camera_rgb_setting": 0,
+  "matched_poses": 826,
+  "ate_rmse_m": 0.764347,
+  "ate_mean_m": 0.642536,
+  "ate_median_m": 0.513469,
+  "ate_max_m": 1.824005,
+  "max_timestamp_difference_s": 0.03,
+  "comparison_baseline_ate_rmse_m": 0.583068,
+  "interpretation": "This single sensitivity run had higher ATE error than the original configuration. It does not establish the cause or show which setting is generally better."
+}

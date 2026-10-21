@@ -1,0 +1,12 @@
+{
+  "experiment": "TUM RGB-D freiburg3_walking_xyz, ORB-SLAM3 estimated poses, person-filtered semantic observations",
+  "method": "same-class spatial clustering",
+  "cluster_radius_m": 0.6,
+  "minimum_observations_per_cluster": 3,
+  "static_observations": 255,
+  "repeated_static_clusters": 13,
+  "observations_in_repeated_clusters": 244,
+  "percent_static_observations_in_repeated_clusters": 95.6862745098,
+  "weighted_mean_position_deviation_m": 0.20623058703732564,
+  "caveat": "Clusters are approximate spatial associations, not verified unique physical-object identities. The metric depends on the clustering threshold and pose accuracy."
+}

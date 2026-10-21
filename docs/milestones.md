@@ -38,7 +38,7 @@
 
 **Evidence:** side-by-side qualitative comparison and map statistics.
 
-## M5 — ORB-SLAM3 baseline (measured; final figure upload pending)
+## M5 — ORB-SLAM3 baseline (measured; trajectory figure published)
 - Compile ORB-SLAM3.
 - Run the RGB-D TUM example.
 - Save `CameraTrajectory.txt`.
@@ -46,7 +46,7 @@
 
 **Evidence:** trajectory plot and ATE/RMSE.
 
-## M6 — SLAM + semantic map integration (local experiment completed; media upload pending)
+## M6 — SLAM + semantic map integration (local experiment completed; map figures published)
 - Replace ground-truth poses with ORB-SLAM3 poses.
 - Rebuild filtered and unfiltered semantic maps.
 - Compare map quality and localization stability.
@@ -69,3 +69,9 @@
 - Mount the RGB-D camera on a mobile base.
 - Integrate pose/map data with ROS 2.
 - Demonstrate indoor robotic perception while moving.
+
+## Final presentation evidence (2026-10-21)
+- Matched-axis unfiltered and person-filtered map figures published in `docs/images/`.
+- Estimated-vs-ground-truth trajectory comparison published in `docs/images/`.
+- Demonstration video published as the `demo-2026-10` GitHub Release asset.
+- Remaining scientific limitation: initial ORB-SLAM3 ATE RMSE is 0.583 m; higher-accuracy localization and stronger semantic data association remain future work.

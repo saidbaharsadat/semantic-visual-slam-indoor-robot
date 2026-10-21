@@ -86,11 +86,10 @@ These remain **optional future extensions**; they are not claimed as implemented
 
 ## Remaining validation and optional extensions
 
-1. Publish reproducible matched-axis map figures and a trajectory visualization.
+1. Improve camera pose accuracy and evaluate on additional RGB-D sequences.
 2. Compare reconstruction quality more rigorously; person-point removal does not quantify map fidelity.
-3. Improve camera pose accuracy and evaluate on additional RGB-D sequences.
-4. Optional: feed dynamic masks back into the Visual SLAM tracking front-end.
-5. Optional: demonstrate ROS 2, Gazebo, live RGB-D camera, or a physical robot.
+3. Optional: feed dynamic masks back into the Visual SLAM tracking front-end.
+4. Optional: demonstrate ROS 2, Gazebo, live RGB-D camera, or a physical robot.
 
 ## Repository layout
 
@@ -179,6 +178,12 @@ The RGB-D ORB-SLAM3 example produced `CameraTrajectory.txt` and `KeyFrameTraject
 
 **Trajectory evaluation:** 826 matched poses after timestamp matching; rigidly aligned ATE RMSE **0.583068 m** (mean 0.512931 m, median 0.447341 m, maximum 1.178976 m). This is a functioning estimated-pose baseline, but it is **not** evidence of precise indoor localization.
 
+**Trajectory comparison**
+
+![ORB-SLAM3 estimated trajectory versus TUM ground truth](docs/images/trajectory_comparison.png)
+
+A separate configuration sensitivity run with `Camera.RGB: 0` produced an ATE RMSE of **0.764347 m** over the same 826 matched poses. This single run had higher error than the original run and does not establish a general preference for either setting. See [the trajectory metrics](docs/results/orbslam3_trajectory_metrics.json) and [the BGR sensitivity metrics](docs/results/orbslam3_bgr_sensitivity_metrics.json).
+
 | Estimated-pose experiment (frame step 15) | Unfiltered | Person-filtered |
 | --- | ---: | ---: |
 | Processed frames | 56 | 56 |
@@ -188,9 +193,22 @@ The RGB-D ORB-SLAM3 example produced `CameraTrajectory.txt` and `KeyFrameTraject
 
 Both runs include 73 person observations and 255 static-class observations. Person masking excluded **70,092 raw sampled points (27.89%)**. These are repeated detections, **not unique objects**. Point reduction alone does not establish a gain in map accuracy or SLAM localization stability.
 
+### Final estimated-pose map comparison
+
+The following matched-scale figures show the local ORB-SLAM3 estimated-pose experiment (56 sampled frames).
+
+**Unfiltered map**
+
+![ORB-SLAM3 unfiltered semantic map](docs/images/unfiltered_matched.png)
+
+**Person-filtered map**
+
+![ORB-SLAM3 person-filtered semantic map](docs/images/filtered_matched.png)
+
+
 **Preliminary viewpoint-consistency experiment:** same-class spatial clustering (0.6 m radius, minimum 3 observations per reported cluster) grouped **244 of 255 static observations into 13 repeated clusters**, with a **0.206231 m observation-weighted mean distance to cluster centroid**. Clusters are **not verified physical-object identities**; the metric depends on cluster thresholds and pose accuracy.
 
-These results were observed in a **local Windows 11 / Ubuntu 22.04 WSL2 run**. Large PLY outputs, weight files, trajectories and final figures remain on the local machine; GitHub Actions validation and public upload of final figures are separate steps.
+These results were observed in a **local Windows 11 / Ubuntu 22.04 WSL2 run**. Large PLY outputs, model weights, raw trajectories and per-frame files remain local. The matched-axis figures are now published below; compact machine-readable result summaries are committed under [`docs/results/`](docs/results/).
 
 **Reproduce semantic mapping after creating the ORB-SLAM3 trajectory** (from the repository root with the TUM dataset downloaded):
 
@@ -254,3 +272,7 @@ The full maps, CSV observations, and raw trajectory files remain local. Machine-
 - reproducible benchmark workflow.
 
 See `docs/milestones.md` for the implementation roadmap and the separation between current work and future extensions.
+
+## Demonstration video
+
+The screen-recorded project demonstration is available as an asset in the [Semantic Visual SLAM Demonstration GitHub Release](https://github.com/saidbaharsadat/semantic-visual-slam-indoor-robot/releases/tag/demo-2026-10).
